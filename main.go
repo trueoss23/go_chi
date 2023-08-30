@@ -5,6 +5,7 @@ import (
 	"log"
 	"net/http"
 
+	cfg "github.com/trueoss23/go_chi/config"
 	"github.com/trueoss23/go_chi/db"
 	"github.com/trueoss23/go_chi/routes"
 )
@@ -18,6 +19,7 @@ func main() {
 	defer db.Close()
 	r := routes.SetupRoutes(db)
 
-	fmt.Println("Server listening on port 8080")
-	log.Fatal(http.ListenAndServe(":8080", r))
+	fmt.Println(cfg.Cfg.AppPort, cfg.Cfg.AppHost, cfg.Cfg.DbUser, cfg.Cfg.DbPass, cfg.Cfg.DbName)
+	fmt.Println("Server listening on port " + cfg.Cfg.AppPort)
+	log.Fatal(http.ListenAndServe(":"+cfg.Cfg.AppPort, r))
 }

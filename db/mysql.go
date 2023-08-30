@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	_ "github.com/go-sql-driver/mysql"
+	cfg "github.com/trueoss23/go_chi/config"
 	"github.com/trueoss23/go_chi/models"
 )
 
@@ -13,7 +14,7 @@ type MySQLDatabase struct {
 }
 
 func (m *MySQLDatabase) Connect() error {
-	dsn := "root:qwe@tcp(localhost:3306)/golang"
+	dsn := cfg.Cfg.DbUser + ":" + cfg.Cfg.DbPass + "@tcp(localhost:3306)/" + cfg.Cfg.DbName
 	conn, err := sql.Open("mysql", dsn)
 	if err != nil {
 		return err
