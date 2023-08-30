@@ -3,24 +3,22 @@ package main
 import (
 	"encoding/json"
 	"net/http"
-	
-	"go_chi/models"
+
 	"github.com/go-chi/chi/middleware"
 	"github.com/go-chi/chi/v5"
+	"github.com/trueoss23/go_chi/models"
 )
-
-
 
 // InMemoryBookService is an implementation of BookService using in-memory storage
 type InMemoryBookService struct {
-	books []Book
+	books []models.Book
 }
 
-func (s *InMemoryBookService) GetBooks() ([]Book, error) {
+func (s *InMemoryBookService) GetBooks() ([]models.Book, error) {
 	return s.books, nil
 }
 
-func (s *InMemoryBookService) GetBookByID(id string) (*Book, error) {
+func (s *InMemoryBookService) GetBookByID(id string) (*models.Book, error) {
 	for _, book := range s.books {
 		if book.ID == id {
 			return &book, nil
@@ -29,7 +27,7 @@ func (s *InMemoryBookService) GetBookByID(id string) (*Book, error) {
 	return nil, nil // Return nil if book is not found
 }
 
-func (s *InMemoryBookService) CreateBook(book Book) error {
+func (s *InMemoryBookService) CreateBook(book models.Book) error {
 	s.books = append(s.books, book)
 	return nil
 }
@@ -84,7 +82,7 @@ func main() {
 	// }' http://localhost:3000/books
 
 	r.Post("/books", func(w http.ResponseWriter, r *http.Request) {
-		var book Book
+		var book models.Book
 		err := json.NewDecoder(r.Body).Decode(&book)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusBadRequest)
