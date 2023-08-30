@@ -7,6 +7,7 @@ import (
 	"github.com/go-chi/chi/middleware"
 	"github.com/go-chi/chi/v5"
 	"github.com/trueoss23/go_chi/models"
+	"github.com/trueoss23/go_chi/db"
 )
 
 // InMemoryBookService is an implementation of BookService using in-memory storage
