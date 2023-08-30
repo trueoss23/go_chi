@@ -12,17 +12,16 @@ import (
 	"github.com/trueoss23/go_chi/models"
 )
 
-func SetupRoutes() *chi.Mux {
+func SetupRoutes(db *db.MySQLDatabase) *chi.Mux {
 	r := chi.NewRouter()
 
 	r.Use(middleware.Logger)
 
-	db := &db.MySQLDatabase{}
+	// db := &db.MySQLDatabase{}
 	err := db.Connect()
 	if err != nil {
 		log.Fatal("Error connecting to db:", err)
 	}
-	defer db.Close()
 
 	r.Get("/books", func(w http.ResponseWriter, r *http.Request) {
 		books, err := db.GetAll()
