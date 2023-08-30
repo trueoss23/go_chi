@@ -17,7 +17,6 @@ func SetupRoutes(db *db.MySQLDatabase) *chi.Mux {
 
 	r.Use(middleware.Logger)
 
-	// db := &db.MySQLDatabase{}
 	err := db.Connect()
 	if err != nil {
 		log.Fatal("Error connecting to db:", err)
