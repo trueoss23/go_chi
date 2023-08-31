@@ -3,7 +3,6 @@ package routes
 import (
 	"encoding/json"
 	"fmt"
-	"log"
 	"net/http"
 
 	"github.com/go-chi/chi/middleware"
@@ -14,16 +13,11 @@ import (
 
 func SetupRoutes(db *db.MySQLDatabase) *chi.Mux {
 	r := chi.NewRouter()
-
 	r.Use(middleware.Logger)
-
-	err := db.Connect()
-	if err != nil {
-		log.Fatal("Error connecting to db:", err)
-	}
 
 	r.Get("/books", func(w http.ResponseWriter, r *http.Request) {
 		books, err := db.GetAll()
+
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
@@ -33,15 +27,18 @@ func SetupRoutes(db *db.MySQLDatabase) *chi.Mux {
 		json.NewEncoder(w).Encode(books)
 	})
 
-	r.Post("/books", func(w http.ResponseWriter, r *http.Request) {
+	r.Post("/book", func(w http.ResponseWriter, r *http.Request) {
 		var book models.BookModel
 		err := json.NewDecoder(r.Body).Decode(&book)
+
 		if err != nil {
 			http.Error(w, "Invalid request payload", http.StatusBadRequest)
 			return
 		}
+
 		fmt.Println(book)
 		err = db.Insert(book)
+
 		if err != nil {
 			http.Error(w, "Failed to insert data", http.StatusInternalServerError)
 			return
@@ -51,10 +48,10 @@ func SetupRoutes(db *db.MySQLDatabase) *chi.Mux {
 		w.Write([]byte("Data inserted successfully"))
 	})
 
-	r.Delete("/books/{id}", func(w http.ResponseWriter, r *http.Request) {
-		bookID := chi.URLParam(r, "id")
-
+	r.Delete("/book/{id}", func(w http.ResponseWriter, r *http.Request) {
+		var bookID string = string(chi.URLParam(r, "id"))
 		err := db.Delete(bookID)
+
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
@@ -65,9 +62,9 @@ func SetupRoutes(db *db.MySQLDatabase) *chi.Mux {
 	})
 
 	r.Get("/book/{id}", func(w http.ResponseWriter, r *http.Request) {
-		bookID := chi.URLParam(r, "id")
-
+		var bookID string = string(chi.URLParam(r, "id"))
 		book, err := db.Get(bookID)
+
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
