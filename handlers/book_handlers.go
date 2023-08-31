@@ -7,11 +7,10 @@ import (
 
 	"github.com/go-chi/chi/middleware"
 	"github.com/go-chi/chi/v5"
-	"github.com/trueoss23/go_chi/db"
 	"github.com/trueoss23/go_chi/models"
 )
 
-func SetupRoutes(db *db.MySQLDatabase) *chi.Mux {
+func SetupRoutes(db models.BooksRepo) *chi.Mux {
 	r := chi.NewRouter()
 	r.Use(middleware.Logger)
 

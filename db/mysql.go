@@ -47,7 +47,8 @@ func (m *MySQLDatabase) Delete(id string) error {
 	m.Connect()
 	defer m.db.Close()
 
-	_, err := m.db.Exec("DELETE FROM books WHERE id = ?", id)
+	elem, err := m.db.Exec("DELETE FROM books WHERE id = ?", id)
+	fmt.Println(elem.RowsAffected())
 
 	if err != nil {
 		return fmt.Errorf("не удалось выполнить запрос на удаление: %w", err)
@@ -56,7 +57,7 @@ func (m *MySQLDatabase) Delete(id string) error {
 	return nil
 }
 
-func (m *MySQLDatabase) Get(id string) (interface{}, error) {
+func (m *MySQLDatabase) Get(id string) (models.Book, error) {
 	var book models.Book
 	m.Connect()
 	defer m.db.Close()
@@ -65,16 +66,16 @@ func (m *MySQLDatabase) Get(id string) (interface{}, error) {
 	err := row.Scan(&book.ID, &book.Title, &book.Author)
 
 	if err == sql.ErrNoRows {
-		return nil, nil
+		return models.Book{}, nil
 	} else if err != nil {
-		return nil, fmt.Errorf("не удалось выполнить запрос на получение: %w", err)
+		return models.Book{}, fmt.Errorf("не удалось выполнить запрос на получение: %w", err)
 	}
 
 	return book, nil
 }
 
-func (m *MySQLDatabase) GetAll() ([]interface{}, error) {
-	var books []interface{}
+func (m *MySQLDatabase) GetAll() ([]models.Book, error) {
+	var books []models.Book
 	m.Connect()
 	defer m.db.Close()
 
@@ -92,7 +93,7 @@ func (m *MySQLDatabase) GetAll() ([]interface{}, error) {
 			return nil, fmt.Errorf("не удалось прочитать результаты запроса: %w", err)
 		}
 
-		books = append(books, &book)
+		books = append(books, book)
 	}
 	return books, nil
 }
