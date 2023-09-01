@@ -1,4 +1,4 @@
-package books
+package repo
 
 import (
 	"database/sql"
