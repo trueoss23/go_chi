@@ -1,122 +1,93 @@
 package main
 
 import (
-	"errors"
+	"database/sql"
 	"fmt"
+
+	_ "github.com/go-sql-driver/mysql"
 
 	"your-package-name/models"
 )
 
 type Repo interface {
-	Connect() error
-	Close() error
 	GetAll() ([]models.Book, error)
 	Get(id string) (models.Book, error)
 	Insert(book models.BookModel) error
 	Delete(id string) error
 }
 
-type MyRepo struct {
-	isConnected bool
-	connection  interface{} // Пользовательский тип для представления подключения
+type MySQLRepo struct {
+	connection *sql.DB
 }
 
-func NewMyRepo() *MyRepo {
-	return &MyRepo{}
+func NewMySQLRepo(connection *sql.DB) *MySQLRepo {
+	return MySQLRepo{connection: connection}
 }
 
-func (r *MyRepo) Connect() error {
-	r.isConnected = true
+func (m *MySQLRepo) Insert(book models.BookModel) error {
+	// defer m.connection.Close()
+
+	query := "INSERT INTO books (title, author) VALUES (?, ?)"
+	_, err := m.connection.Exec(query, book.Title, book.Author)
+
+	if err != nil {
+		return err
+	}
+
 	return nil
 }
 
-func (r *MyRepo) Close() error {
-	r.isConnected = false
+func (m *MySQLRepo) Delete(id string) error {
+	// m.Connect()
+	// defer m.connection.Close()
+
+	elem, err := m.connection.Exec("DELETE FROM books WHERE id = ?", id)
+	fmt.Println(elem.RowsAffected())
+
+	if err != nil {
+		return fmt.Errorf("не удалось выполнить запрос на удаление: %w", err)
+	}
+
 	return nil
 }
 
-func (r *MyRepo) GetAll() ([]models.Book, error) {
-	if !r.isConnected {
-		return nil, errors.New("нет подключения")
+func (m *MySQLRepo) Get(id string) (models.Book, error) {
+	var book models.Book
+	// m.Connect()
+	// defer m.connection.Close()
+
+	row := m.connection.QueryRow("SELECT id, title, author FROM books WHERE id = ?", id)
+	err := row.Scan(&book.ID, &book.Title, &book.Author)
+
+	if err == sql.ErrNoRows {
+		return models.Book{}, nil
+	} else if err != nil {
+		return models.Book{}, fmt.Errorf("не удалось выполнить запрос на получение: %w", err)
 	}
-
-	// Здесь вы можете выполнить операцию получения всех записей из источника данных
-	// Например:
-	var books []models.Book = 
-
-	return books, nil
-}
-
-func (r *MyRepo) Get(id string) (models.Book, error) {
-	if !r.isConnected {
-		return models.Book{}, errors.New("нет подключения")
-	}
-
-	// Здесь вы можете выполнить операцию получения записи по идентификатору из источника данных
-	// Например:
-	book := models.Book{Title: "Book", Author: "Author"}
 
 	return book, nil
 }
 
-func (r *MyRepo) Insert(book models.Book) error {
-	if !r.isConnected {
-		return errors.New("нет подключения")
-	}
+func (m *MySQLRepo) GetAll() ([]models.Book, error) {
+	var books []models.Book
+	// m.Connect()
+	// defer m.connection.Close()
 
-	// Здесь вы можете выполнить операцию вставки новой записи в источник данных
-	// Например:
-	fmt.Println("Вставка новой книги:", book)
+	rows, err := m.connection.Query("SELECT id, title, author FROM books")
 
-	return nil
-}
-
-func (r *MyRepo) Delete(id string) error {
-	if !r.isConnected {
-		return errors.New("нет подключения")
-	}
-
-	// Здесь вы можете выполнить операцию удаления записи по идентификатору из источника данных
-	// Например:
-	fmt.Println("Удаление книги с ID:", id)
-
-	return nil
-}
-
-func main() {
-	repo := NewMyRepo()
-
-	err := repo.Connect()
 	if err != nil {
-		fmt.Println("Ошибка при подключении:", err)
+		return nil, fmt.Errorf("не удалось выполнить запрос на получение всех книг: %w", err)
 	}
 
-	books, err := repo.GetAll()
-	if err != nil {
-		fmt.Println("Ошибка при получении всех книг:", err)
-	} else {
-		fmt.Println("Все книги:", books)
-	}
+	for rows.Next() {
+		var book models.Book
+		err := rows.Scan(&book.ID, &book.Title, &book.Author)
 
-	book, err := repo.Get("1")
-	if err != nil {
-		fmt.Println("Ошибка при получении книги:", err)
-	} else {
-		fmt.Println("Книга с ID 1:", book)
-	}
+		if err != nil {
+			return nil, fmt.Errorf("не удалось прочитать результаты запроса: %w", err)
+		}
 
-	err = repo.Insert(models.Book{Title: "Новая книга", Author: "Автор"})
-	if err != nil {
-		fmt.Println("Ошибка при вставке книги:", err)
+		books = append(books, book)
 	}
-
-	err = repo.Delete("1")
-	if err != nil {
-		fmt.Println("Ошибка при удалении книги:", err)
-	}
-
-	err = repo.Close()
-	if err != nil {
-		fmt.Println("Ошибка при закрытии подключения:", err)
-	}
+	return books, nil
 }

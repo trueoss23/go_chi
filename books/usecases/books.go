@@ -9,8 +9,6 @@ import (
 )
 
 type Usecase interface {
-	Connect() error
-	Close() error
 	GetAll() ([]models.Book, error)
 	Get(id string) (models.Book, error)
 	Insert(book models.BookModel) error

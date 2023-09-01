@@ -10,22 +10,27 @@ import (
 
 	"github.com/go-chi/chi/middleware"
 	"github.com/go-chi/chi/v5"
+	"github.com/trueoss23/go_chi/books/repo"
+	"github.com/trueoss23/go_chi/books/usecases"
 	cfg "github.com/trueoss23/go_chi/config"
 	"github.com/trueoss23/go_chi/handlers"
-	"github.com/trueoss23/go_chi/books/usecases"
-	"github.com/trueoss23/go_chi/books/repo"
 )
 
 func main() {
-	mysqlrep = 
-	rep = repo.NewBooksRepo(mysqlrep)
-	usecase = usecases.NewBookUseCase(rep)
-	db := *sql.DB
-	h := &handlers.Handler{DB: db}
+	dsn := cfg.Cfg.DbUser + ":" + cfg.Cfg.DbPass + "@tcp(localhost:3306)/" + cfg.Cfg.DbName
+	conn, err := sql.Open("mysql", dsn)
+	if err != nil {
+		log.Fatal("No conn!!", err)
+	}
+	defer conn.Close()
+	rep := repo.NewBooksRepo(conn)
+	usecase := usecases.NewBookUseCase(rep)
+	// db := *sql.DB
+	h := &handlers.Handler{DB: usecase}
 	r := chi.NewRouter()
 	r.Use(middleware.Logger)
 
-	r.Get("/books", h.GetAllBooks) // Используем методы хэндлера вместо анонимных функций
+	r.Get("/books", h.GetAllBooks)
 	r.Post("/book", h.CreateBook)
 	r.Delete("/book/{id}", h.DeleteBook)
 	r.Get("/book/{id}", h.GetBook)

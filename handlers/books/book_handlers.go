@@ -1,4 +1,4 @@
-package handlers
+package books
 
 import (
 	"encoding/json"
@@ -6,11 +6,12 @@ import (
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
+	"github.com/trueoss23/go_chi/books/usecases"
 	"github.com/trueoss23/go_chi/models"
 )
 
 type Handler struct {
-	DB models.BooksRepo
+	DB usecases.Usecase
 }
 
 func (h *Handler) GetAllBooks(w http.ResponseWriter, r *http.Request) {
