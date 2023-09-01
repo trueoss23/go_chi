@@ -3,6 +3,7 @@ package repo
 import (
 	"database/sql"
 	"fmt"
+	"strconv"
 
 	_ "github.com/go-sql-driver/mysql"
 
@@ -12,7 +13,7 @@ import (
 type Repo interface {
 	GetAll() ([]models.Book, error)
 	Get(id string) (models.Book, error)
-	Insert(book models.BookModel) error
+	Insert(book models.BookModel) (models.Book, error)
 	Delete(id string) error
 }
 
@@ -24,22 +25,25 @@ func NewMySQLRepo(connection *sql.DB) *MySQLRepo {
 	return &MySQLRepo{connection: connection}
 }
 
-func (m *MySQLRepo) Insert(book models.BookModel) error {
-	// defer m.connection.Close()
+func (m *MySQLRepo) Insert(book models.BookModel) (models.Book, error) {
 
 	query := "INSERT INTO books (title, author) VALUES (?, ?)"
-	_, err := m.connection.Exec(query, book.Title, book.Author)
+	res, err := m.connection.Exec(query, book.Title, book.Author)
 
 	if err != nil {
-		return err
+		return models.Book{}, err
+	}
+	id, _ := res.LastInsertId()
+	resultBook := models.Book{
+		ID:     strconv.FormatInt(id, 10),
+		Title:  book.Title,
+		Author: book.Author,
 	}
 
-	return nil
+	return resultBook, nil
 }
 
 func (m *MySQLRepo) Delete(id string) error {
-	// m.Connect()
-	// defer m.connection.Close()
 
 	elem, err := m.connection.Exec("DELETE FROM books WHERE id = ?", id)
 	fmt.Println(elem.RowsAffected())
@@ -53,8 +57,6 @@ func (m *MySQLRepo) Delete(id string) error {
 
 func (m *MySQLRepo) Get(id string) (models.Book, error) {
 	var book models.Book
-	// m.Connect()
-	// defer m.connection.Close()
 
 	row := m.connection.QueryRow("SELECT id, title, author FROM books WHERE id = ?", id)
 	err := row.Scan(&book.ID, &book.Title, &book.Author)
@@ -70,8 +72,6 @@ func (m *MySQLRepo) Get(id string) (models.Book, error) {
 
 func (m *MySQLRepo) GetAll() ([]models.Book, error) {
 	var books []models.Book
-	// m.Connect()
-	// defer m.connection.Close()
 
 	rows, err := m.connection.Query("SELECT id, title, author FROM books")
 

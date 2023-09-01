@@ -23,10 +23,9 @@ func main() {
 		log.Fatal("No conn!!", err)
 	}
 	defer conn.Close()
-	rep := repo.NewBooksRepo(conn)
+	rep := repo.NewMySQLRepo(conn)
 	usecase := usecases.NewBookUseCase(rep)
-	// db := *sql.DB
-	h := &handlers.Handler{DB: usecase}
+	h := handlers.NewHandler(usecase)
 	r := chi.NewRouter()
 	r.Use(middleware.Logger)
 

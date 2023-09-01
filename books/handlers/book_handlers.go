@@ -11,11 +11,17 @@ import (
 )
 
 type Handler struct {
-	DB usecases.Usecase
+	Usecase usecases.Usecase
+}
+
+func NewHandler(usecase usecases.Usecase) *Handler {
+	return &Handler{
+		Usecase: usecase,
+	}
 }
 
 func (h *Handler) GetAllBooks(w http.ResponseWriter, r *http.Request) {
-	books, err := h.DB.GetAll()
+	books, err := h.Usecase.GetAll()
 
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -36,7 +42,8 @@ func (h *Handler) CreateBook(w http.ResponseWriter, r *http.Request) {
 	}
 
 	fmt.Println(book)
-	err = h.DB.Insert(book)
+	bookInsert, err := h.Usecase.Insert(book)
+	fmt.Println(bookInsert)
 
 	if err != nil {
 		http.Error(w, "Failed to insert data", http.StatusInternalServerError)
@@ -49,7 +56,7 @@ func (h *Handler) CreateBook(w http.ResponseWriter, r *http.Request) {
 
 func (h *Handler) DeleteBook(w http.ResponseWriter, r *http.Request) {
 	bookID := chi.URLParam(r, "id")
-	err := h.DB.Delete(bookID)
+	err := h.Usecase.Delete(bookID)
 
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -62,7 +69,7 @@ func (h *Handler) DeleteBook(w http.ResponseWriter, r *http.Request) {
 
 func (h *Handler) GetBook(w http.ResponseWriter, r *http.Request) {
 	bookID := chi.URLParam(r, "id")
-	book, err := h.DB.Get(bookID)
+	book, err := h.Usecase.Get(bookID)
 
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)

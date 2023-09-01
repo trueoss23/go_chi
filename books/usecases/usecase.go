@@ -9,7 +9,7 @@ import (
 type Usecase interface {
 	GetAll() ([]models.Book, error)
 	Get(id string) (models.Book, error)
-	Insert(book models.BookModel) (*models.Book, error)
+	Insert(book models.BookModel) (models.Book, error)
 	Delete(id string) error
 }
 
@@ -23,25 +23,26 @@ func NewBookUseCase(bookRepo repo.Repo) *BookUseCase {
 	}
 }
 
-func (uc *BookUseCase) Insert(bookmodel models.BookModel) (*models.Book, error) {
-
-	book := &models.Book{
-		Title:  bookmodel.Title,
-		Author: bookmodel.Author,
-	}
-
-	err := uc.bookRepo.Insert(book)
+func (uc *BookUseCase) GetAll() ([]models.Book, error) {
+	books, err := uc.bookRepo.GetAll()
 	if err != nil {
-		return nil, err
+		return []models.Book{}, err
 	}
-
-	return book, nil
+	return books, nil
 }
 
-func (uc *BookUseCase) Get(id string) (*models.Book, error) {
+func (uc *BookUseCase) Insert(bookmodel models.BookModel) (models.Book, error) {
+	bookInsert, err := uc.bookRepo.Insert(bookmodel)
+	if err != nil {
+		return models.Book{}, err
+	}
+	return bookInsert, nil
+}
+
+func (uc *BookUseCase) Get(id string) (models.Book, error) {
 	book, err := uc.bookRepo.Get(id)
 	if err != nil {
-		return nil, err
+		return models.Book{}, err
 	}
 
 	return book, nil
@@ -52,6 +53,5 @@ func (uc *BookUseCase) Delete(id string) error {
 	if err != nil {
 		return err
 	}
-
 	return nil
 }
