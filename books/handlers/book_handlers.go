@@ -7,7 +7,7 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/trueoss23/go_chi/books/usecases"
-	"github.com/trueoss23/go_chi/models"
+	"github.com/trueoss23/go_chi/domain/models"
 )
 
 type Handler struct {

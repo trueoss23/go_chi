@@ -6,7 +6,7 @@ import (
 
 	_ "github.com/go-sql-driver/mysql"
 
-	"your-package-name/models"
+	"ithub.com/trueoss23/go_chi/domain/models"
 )
 
 type Repo interface {

@@ -4,8 +4,8 @@ import (
 	"errors"
 
 	"github.com/trueoss23/go_chi/books/repo"
-	
-	"github.com/trueoss23/go_chi/models"
+
+	"github.com/trueoss23/go_chi/domain/models"
 )
 
 type Usecase interface {
