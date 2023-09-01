@@ -11,11 +11,4 @@ type BookModel struct {
 	Author string `json:"author"`
 }
 
-type BooksRepo interface {
-	Connect() error
-	Close() error
-	GetAll() ([]Book, error)
-	Get(id string) (Book, error)
-	Insert(book BookModel) error
-	Delete(id string) error
-}
+

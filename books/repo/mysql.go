@@ -1,4 +1,4 @@
-package db
+package repo
 
 import (
 	"database/sql"
@@ -9,8 +9,10 @@ import (
 	"github.com/trueoss23/go_chi/models"
 )
 
+
+
 type MySQLDatabase struct {
-	db *sql.DB
+	db Repo
 }
 
 func (m *MySQLDatabase) Connect() error {

@@ -1,20 +1,26 @@
 package main
 
 import (
+	"database/sql"
 	"fmt"
 	"log"
 	"net/http"
 
+	_ "github.com/go-sql-driver/mysql"
+
 	"github.com/go-chi/chi/middleware"
 	"github.com/go-chi/chi/v5"
 	cfg "github.com/trueoss23/go_chi/config"
-	"github.com/trueoss23/go_chi/db"
 	"github.com/trueoss23/go_chi/handlers"
+	"github.com/trueoss23/go_chi/books/usecases"
+	"github.com/trueoss23/go_chi/books/repo"
 )
 
 func main() {
-	db := &db.MySQLDatabase{}
-	// r := handlers.SetupRoutes(db)
+	mysqlrep = 
+	rep = repo.NewBooksRepo(mysqlrep)
+	usecase = usecases.NewBookUseCase(rep)
+	db := *sql.DB
 	h := &handlers.Handler{DB: db}
 	r := chi.NewRouter()
 	r.Use(middleware.Logger)
