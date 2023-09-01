@@ -10,10 +10,10 @@ import (
 
 	"github.com/go-chi/chi/middleware"
 	"github.com/go-chi/chi/v5"
+	"github.com/trueoss23/go_chi/books/handlers"
 	"github.com/trueoss23/go_chi/books/repo"
 	"github.com/trueoss23/go_chi/books/usecases"
 	cfg "github.com/trueoss23/go_chi/config"
-	"github.com/trueoss23/go_chi/handlers"
 )
 
 func main() {
