@@ -6,7 +6,7 @@ import (
 
 	_ "github.com/go-sql-driver/mysql"
 
-	"ithub.com/trueoss23/go_chi/domain/models"
+	"github.com/trueoss23/go_chi/domain/models"
 )
 
 type Repo interface {
@@ -21,7 +21,7 @@ type MySQLRepo struct {
 }
 
 func NewMySQLRepo(connection *sql.DB) *MySQLRepo {
-	return MySQLRepo{connection: connection}
+	return &MySQLRepo{connection: connection}
 }
 
 func (m *MySQLRepo) Insert(book models.BookModel) error {
