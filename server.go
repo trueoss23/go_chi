@@ -1,4 +1,4 @@
-package server
+package main
 
 import (
 	"context"
@@ -34,5 +34,5 @@ func StartServer(port string, r chi.Router) {
 	if err := srv.Shutdown(ctx); err != nil {
 		log.Fatalf("Server Shutdown Failed:%+v", err)
 	}
-	log.Println("Сервер корректно завершил работу.")
+	log.Println("ServerS hutdown Grace!!)")
 }
