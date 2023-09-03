@@ -17,7 +17,7 @@ type BookUseCase struct {
 	bookRepo repo.Repo
 }
 
-func NewBookUseCase(bookRepo repo.Repo) *BookUseCase {
+func NewBookUseCase(bookRepo repo.Repo) Usecase {
 	return &BookUseCase{
 		bookRepo: bookRepo,
 	}

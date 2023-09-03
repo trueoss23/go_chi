@@ -6,12 +6,11 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
-	"time"
 
 	"github.com/go-chi/chi/v5"
 )
 
-func StartServer(port string, r chi.Router) {
+func StartServer(ctx context.Context, port string, r chi.Router) {
 	srv := &http.Server{
 		Addr:    ":" + port,
 		Handler: r,
@@ -28,11 +27,8 @@ func StartServer(port string, r chi.Router) {
 
 	<-stop
 
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-	defer cancel()
-
 	if err := srv.Shutdown(ctx); err != nil {
 		log.Fatalf("Server Shutdown Failed:%+v", err)
 	}
-	log.Println("ServerS hutdown Grace!!)")
+	log.Println("Server Shutdown Grace!!)")
 }

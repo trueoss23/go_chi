@@ -1,6 +1,7 @@
 package repo
 
 import (
+	"context"
 	"database/sql"
 	"fmt"
 	"strconv"
@@ -18,11 +19,12 @@ type Repo interface {
 }
 
 type MySQLRepo struct {
+	ctx        context.Context
 	connection *sql.DB
 }
 
-func NewMySQLRepo(connection *sql.DB) *MySQLRepo {
-	return &MySQLRepo{connection: connection}
+func NewMySQLRepo(ctx context.Context, connection *sql.DB) Repo {
+	return &MySQLRepo{ctx: ctx, connection: connection}
 }
 
 func (m *MySQLRepo) Insert(book models.BookModel) (models.Book, error) {
@@ -31,6 +33,8 @@ func (m *MySQLRepo) Insert(book models.BookModel) (models.Book, error) {
 	res, err := m.connection.Exec(query, book.Title, book.Author)
 
 	if err != nil {
+		_, cancel := context.WithCancel(m.ctx)
+		cancel()
 		return models.Book{}, err
 	}
 	id, _ := res.LastInsertId()
@@ -49,6 +53,8 @@ func (m *MySQLRepo) Delete(id string) error {
 	fmt.Println(elem.RowsAffected())
 
 	if err != nil {
+		_, cancel := context.WithCancel(m.ctx)
+		cancel()
 		return fmt.Errorf("не удалось выполнить запрос на удаление: %w", err)
 	}
 
@@ -62,6 +68,8 @@ func (m *MySQLRepo) Get(id string) (models.Book, error) {
 	err := row.Scan(&book.ID, &book.Title, &book.Author)
 
 	if err == sql.ErrNoRows {
+		_, cancel := context.WithCancel(m.ctx)
+		cancel()
 		return models.Book{}, nil
 	} else if err != nil {
 		return models.Book{}, fmt.Errorf("не удалось выполнить запрос на получение: %w", err)
@@ -76,6 +84,8 @@ func (m *MySQLRepo) GetAll() ([]models.Book, error) {
 	rows, err := m.connection.Query("SELECT id, title, author FROM books")
 
 	if err != nil {
+		_, cancel := context.WithCancel(m.ctx)
+		cancel()
 		return nil, fmt.Errorf("не удалось выполнить запрос на получение всех книг: %w", err)
 	}
 
@@ -84,6 +94,8 @@ func (m *MySQLRepo) GetAll() ([]models.Book, error) {
 		err := rows.Scan(&book.ID, &book.Title, &book.Author)
 
 		if err != nil {
+			_, cancel := context.WithCancel(m.ctx)
+			cancel()
 			return nil, fmt.Errorf("не удалось прочитать результаты запроса: %w", err)
 		}
 
