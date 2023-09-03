@@ -1,7 +1,6 @@
 package handlers
 
 import (
-	"context"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -12,23 +11,19 @@ import (
 )
 
 type Handler struct {
-	ctx     context.Context
 	Usecase usecases.Usecase
 }
 
-func NewHandler(ctx context.Context, usecase usecases.Usecase) *Handler {
+func NewHandler(usecase usecases.Usecase) *Handler {
 	return &Handler{
-		ctx:     ctx,
 		Usecase: usecase,
 	}
 }
 
 func (h *Handler) GetAllBooks(w http.ResponseWriter, r *http.Request) {
 	books, err := h.Usecase.GetAll()
-
 	if err != nil {
-		_, cancel := context.WithCancel(h.ctx)
-		cancel()
+
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -42,8 +37,6 @@ func (h *Handler) CreateBook(w http.ResponseWriter, r *http.Request) {
 	err := json.NewDecoder(r.Body).Decode(&book)
 
 	if err != nil {
-		_, cancel := context.WithCancel(h.ctx)
-		cancel()
 		http.Error(w, "Invalid request payload", http.StatusBadRequest)
 		return
 	}
@@ -53,8 +46,6 @@ func (h *Handler) CreateBook(w http.ResponseWriter, r *http.Request) {
 	fmt.Println(bookInsert)
 
 	if err != nil {
-		_, cancel := context.WithCancel(h.ctx)
-		cancel()
 		http.Error(w, "Failed to insert data", http.StatusInternalServerError)
 		return
 	}
@@ -68,8 +59,6 @@ func (h *Handler) DeleteBook(w http.ResponseWriter, r *http.Request) {
 	err := h.Usecase.Delete(bookID)
 
 	if err != nil {
-		_, cancel := context.WithCancel(h.ctx)
-		cancel()
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -83,8 +72,6 @@ func (h *Handler) GetBook(w http.ResponseWriter, r *http.Request) {
 	book, err := h.Usecase.Get(bookID)
 
 	if err != nil {
-		_, cancel := context.WithCancel(h.ctx)
-		cancel()
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}

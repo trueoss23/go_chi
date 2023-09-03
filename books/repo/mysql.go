@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"fmt"
 	"strconv"
+	"time"
 
 	_ "github.com/go-sql-driver/mysql"
 
@@ -19,22 +20,21 @@ type Repo interface {
 }
 
 type MySQLRepo struct {
-	ctx        context.Context
 	connection *sql.DB
 }
 
-func NewMySQLRepo(ctx context.Context, connection *sql.DB) Repo {
-	return &MySQLRepo{ctx: ctx, connection: connection}
+func NewMySQLRepo(connection *sql.DB) Repo {
+	return &MySQLRepo{connection: connection}
 }
 
 func (m *MySQLRepo) Insert(book models.BookModel) (models.Book, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
 
 	query := "INSERT INTO books (title, author) VALUES (?, ?)"
-	res, err := m.connection.Exec(query, book.Title, book.Author)
+	res, err := m.connection.ExecContext(ctx, query, book.Title, book.Author)
 
 	if err != nil {
-		_, cancel := context.WithCancel(m.ctx)
-		cancel()
 		return models.Book{}, err
 	}
 	id, _ := res.LastInsertId()
@@ -48,13 +48,13 @@ func (m *MySQLRepo) Insert(book models.BookModel) (models.Book, error) {
 }
 
 func (m *MySQLRepo) Delete(id string) error {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
 
-	elem, err := m.connection.Exec("DELETE FROM books WHERE id = ?", id)
+	elem, err := m.connection.ExecContext(ctx, "DELETE FROM books WHERE id = ?", id)
 	fmt.Println(elem.RowsAffected())
 
 	if err != nil {
-		_, cancel := context.WithCancel(m.ctx)
-		cancel()
 		return fmt.Errorf("не удалось выполнить запрос на удаление: %w", err)
 	}
 
@@ -62,14 +62,14 @@ func (m *MySQLRepo) Delete(id string) error {
 }
 
 func (m *MySQLRepo) Get(id string) (models.Book, error) {
-	var book models.Book
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
 
-	row := m.connection.QueryRow("SELECT id, title, author FROM books WHERE id = ?", id)
+	var book models.Book
+	row := m.connection.QueryRowContext(ctx, "SELECT id, title, author FROM books WHERE id = ?", id)
 	err := row.Scan(&book.ID, &book.Title, &book.Author)
 
 	if err == sql.ErrNoRows {
-		_, cancel := context.WithCancel(m.ctx)
-		cancel()
 		return models.Book{}, nil
 	} else if err != nil {
 		return models.Book{}, fmt.Errorf("не удалось выполнить запрос на получение: %w", err)
@@ -79,13 +79,14 @@ func (m *MySQLRepo) Get(id string) (models.Book, error) {
 }
 
 func (m *MySQLRepo) GetAll() ([]models.Book, error) {
-	var books []models.Book
 
-	rows, err := m.connection.Query("SELECT id, title, author FROM books")
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	var books []models.Book
+	rows, err := m.connection.QueryContext(ctx, "SELECT id, title, author FROM books")
 
 	if err != nil {
-		_, cancel := context.WithCancel(m.ctx)
-		cancel()
 		return nil, fmt.Errorf("не удалось выполнить запрос на получение всех книг: %w", err)
 	}
 
@@ -94,12 +95,10 @@ func (m *MySQLRepo) GetAll() ([]models.Book, error) {
 		err := rows.Scan(&book.ID, &book.Title, &book.Author)
 
 		if err != nil {
-			_, cancel := context.WithCancel(m.ctx)
-			cancel()
 			return nil, fmt.Errorf("не удалось прочитать результаты запроса: %w", err)
 		}
-
 		books = append(books, book)
 	}
+
 	return books, nil
 }

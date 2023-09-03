@@ -6,11 +6,15 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"time"
 
 	"github.com/go-chi/chi/v5"
 )
 
-func StartServer(ctx context.Context, port string, r chi.Router) {
+func StartServer(port string, r chi.Router) {
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
+	defer cancel()
+
 	srv := &http.Server{
 		Addr:    ":" + port,
 		Handler: r,

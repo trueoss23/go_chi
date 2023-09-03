@@ -1,10 +1,8 @@
 package main
 
 import (
-	"context"
 	"database/sql"
 	"log"
-	"time"
 
 	"github.com/go-chi/chi/middleware"
 	"github.com/go-chi/chi/v5"
@@ -19,15 +17,13 @@ import (
 func main() {
 	dsn := cfg.Cfg.DbUser + ":" + cfg.Cfg.DbPass + "@tcp(localhost:3306)/" + cfg.Cfg.DbName
 	Conn, err := sql.Open("mysql", dsn)
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-	defer cancel()
 	if err != nil {
 		log.Fatal("No Conn!!", err)
 	}
 	defer Conn.Close()
-	rep := repo.NewMySQLRepo(ctx, Conn)
-	usecase := usecases.NewBookUseCase(ctx, rep)
-	h := handlers.NewHandler(ctx, usecase)
+	rep := repo.NewMySQLRepo(Conn)
+	usecase := usecases.NewBookUseCase(rep)
+	h := handlers.NewHandler(usecase)
 
 	r := chi.NewRouter()
 	r.Use(middleware.Logger)
@@ -35,5 +31,5 @@ func main() {
 	r.Post("/book", h.CreateBook)
 	r.Delete("/book/{id}", h.DeleteBook)
 	r.Get("/book/{id}", h.GetBook)
-	StartServer(ctx, cfg.Cfg.AppPort, r)
+	StartServer(cfg.Cfg.AppPort, r)
 }
