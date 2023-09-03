@@ -7,6 +7,8 @@ import (
 	"os"
 	"os/signal"
 	"time"
+
+	"github.com/go-chi/chi/v5"
 )
 
 func StartServer(port string, r chi.Router) {
