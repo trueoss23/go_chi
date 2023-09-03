@@ -26,8 +26,8 @@ func main() {
 	}
 	defer Conn.Close()
 	rep := repo.NewMySQLRepo(ctx, Conn)
-	usecase := usecases.NewBookUseCase(rep)
-	h := handlers.NewHandler(usecase)
+	usecase := usecases.NewBookUseCase(ctx, rep)
+	h := handlers.NewHandler(ctx, usecase)
 
 	r := chi.NewRouter()
 	r.Use(middleware.Logger)
