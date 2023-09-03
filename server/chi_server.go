@@ -1,10 +1,18 @@
 package server
 
+import (
+	"context"
+	"log"
+	"net/http"
+	"os"
+	"os/signal"
+	"time"
+)
 
-func startServer(port string, R chi.Router) {
+func StartServer(port string, r chi.Router) {
 	srv := &http.Server{
 		Addr:    ":" + port,
-		Handler: R,
+		Handler: r,
 	}
 
 	go func() {
